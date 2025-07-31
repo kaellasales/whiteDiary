@@ -44,11 +44,17 @@ export default function HomeScreen() {
         {notes.length === 0 && <Text style={styles.noNotes}>Nenhuma anotação ainda.</Text>}
         {notes.map((note, index) => (
           <View key={index} style={styles.noteBox}>
-            <Text style={styles.noteTitle}>{note.title}</Text>
+
+            <TouchableOpacity onPress={() => router.push({ pathname: '/EditNote', params: { index: String(index) } })}>
+              <Text style={styles.noteTitle}>{note.title}</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.deleteButton} onPress={() => deleteNote(index)}>
               <Text style={styles.deleteText}>Excluir</Text>
             </TouchableOpacity>
+
           </View>
+          
         ))}
       </ScrollView>
 
