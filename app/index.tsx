@@ -5,6 +5,9 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { Alert } from 'react-native';
+
+
 
 type Note = {
   title: string;
@@ -40,26 +43,41 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Minhas Anotações</Text>
 
-      <ScrollView style={styles.scroll}>
-        {notes.length === 0 && <Text style={styles.noNotes}>Nenhuma anotação ainda.</Text>}
+  <ScrollView style={styles.scroll}>
         {notes.map((note, index) => (
-          <View key={index} style={styles.noteBox}>
-
-            <TouchableOpacity onPress={() => router.push({ pathname: '/EditNote', params: { index: String(index) } })}>
-              <Text style={styles.noteTitle}>{note.title}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteNote(index)}>
-              <Text style={styles.deleteText}>Excluir</Text>
-            </TouchableOpacity>
-
-          </View>
-          
+          <TouchableOpacity
+            key={index}
+            style={styles.noteBox}
+            onPress={() =>
+              router.push({
+                pathname: '/EditNote',
+                params: { index: String(index) },
+              })
+            }
+            onLongPress={() => {
+              Alert.alert(
+                'Excluir anotação',
+                'Tem certeza que deseja excluir esta anotação?',
+                [
+                  { text: 'Cancelar', style: 'cancel' },
+                  {
+                    text: 'Excluir',
+                    onPress: () => deleteNote(index),
+                    style: 'destructive',
+                  },
+                ]
+              );
+            }}
+          >
+            <Text style={styles.noteTitle}>{note.title}</Text>
+          </TouchableOpacity>
         ))}
       </ScrollView>
-
-      <TouchableOpacity style={styles.addButton} onPress={() => router.push('/add-note')}>
-        <Text style={styles.addButtonText}>+ Nova Anotação</Text>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => router.push('/add-note')}
+      >
+        <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
     </View>
   );
@@ -68,7 +86,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-  scroll: { marginBottom: 20 },
+  scroll: { marginBottom: 100 },
   noNotes: { fontStyle: 'italic', color: '#888' },
   noteBox: { padding: 15, backgroundColor: '#f0f0f0', marginBottom: 10, borderRadius: 8 },
   noteTitle: { fontSize: 16, fontWeight: 'bold' },

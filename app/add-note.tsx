@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet
 } from 'react-native';
@@ -9,31 +9,56 @@ export default function AddNoteScreen() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [existingNotes, setExistingNotes] = useState<any[]>([]);
+  const [noteIndex, setNoteIndex] = useState<number | null>(null);
 
-  const saveNote = async () => {
-    if (title.trim() === '' || content.trim() === '') {
-      alert('Preencha título e conteúdo!');
-      return;
-    }
+  // Carregar notas existentes uma vez
+  useEffect(() => {
+    const loadNotes = async () => {
+      const stored = await AsyncStorage.getItem('notes');
+      if (stored) {
+        setExistingNotes(JSON.parse(stored));
+      }
+    };
+    loadNotes();
+  }, []);
 
-    const stored = await AsyncStorage.getItem('notes');
-    const existingNotes = stored ? JSON.parse(stored) : [];
+  // Autosave
+  useEffect(() => {
+    const saveTimeout = setTimeout(async () => {
+      if (title.trim() === '' && content.trim() === '') return;
 
-    const newNote = { title, content };
-    const updatedNotes = [...existingNotes, newNote];
+      let updatedNotes = [...existingNotes];
 
-    await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
-    router.back();
-  };
+      if (noteIndex === null) {
+        // Criar nova nota
+        const newNote = { title, content };
+        updatedNotes.push(newNote);
+        setNoteIndex(updatedNotes.length - 1);
+      } else {
+        // Atualizar nota existente
+        updatedNotes[noteIndex] = { title, content };
+      }
+
+      setExistingNotes(updatedNotes);
+      await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+    }, 700);
+
+    return () => clearTimeout(saveTimeout);
+  }, [title, content]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Nova Anotação</Text>
+      {/* Botão de voltar */}
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>&lt; todos notes</Text>
+      </TouchableOpacity>
 
       <Text style={styles.label}>Título</Text>
       <TextInput
         style={styles.input}
         placeholder="Digite o título..."
+        placeholderTextColor="#aaa"
         value={title}
         onChangeText={setTitle}
       />
@@ -42,39 +67,25 @@ export default function AddNoteScreen() {
       <TextInput
         style={[styles.input, { height: 150 }]}
         placeholder="Digite sua anotação..."
+        placeholderTextColor="#aaa"
         multiline
         value={content}
         onChangeText={setContent}
       />
-
-      <TouchableOpacity style={styles.button} onPress={saveNote}>
-        <Text style={styles.buttonText}>Salvar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.cancel} onPress={() => router.back()}>
-        <Text style={styles.cancelText}>Cancelar</Text>
-      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-  label: { fontWeight: 'bold', marginBottom: 5, marginTop: 15, fontSize: 16 },
+  container: { flex: 1, padding: 20, backgroundColor: '#121212' },
+  backButton: { marginBottom: 10 },
+  backButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  label: { fontWeight: 'bold', marginBottom: 5, marginTop: 15, fontSize: 16, color: '#fff' },
   input: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#222',
+    color: '#fff',
     padding: 15,
     borderRadius: 8,
     textAlignVertical: 'top'
-  },
-  button: {
-    backgroundColor: '#2a9d8f',
-    marginTop: 20,
-    padding: 15,
-    alignItems: 'center',
-    borderRadius: 8
-  },
-  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  cancel: { marginTop: 10, alignItems: 'center' },
-  cancelText: { color: '#555' }
+  }
 });
