@@ -6,12 +6,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 
+type Note = {
+  title: string;
+  content: string;
+};
+
 export default function HomeScreen() {
   const router = useRouter();
-  const isFocused = useIsFocused(); // recarrega ao voltar
-  const [notes, setNotes] = useState<string[]>([]);
+  const isFocused = useIsFocused();
+  const [notes, setNotes] = useState<Note[]>([]);
 
-  // Carregar notas salvas
   useEffect(() => {
     if (isFocused) {
       loadNotes();
@@ -40,7 +44,7 @@ export default function HomeScreen() {
         {notes.length === 0 && <Text style={styles.noNotes}>Nenhuma anotação ainda.</Text>}
         {notes.map((note, index) => (
           <View key={index} style={styles.noteBox}>
-            <Text style={styles.noteText}>{note}</Text>
+            <Text style={styles.noteTitle}>{note.title}</Text>
             <TouchableOpacity style={styles.deleteButton} onPress={() => deleteNote(index)}>
               <Text style={styles.deleteText}>Excluir</Text>
             </TouchableOpacity>
@@ -61,7 +65,7 @@ const styles = StyleSheet.create({
   scroll: { marginBottom: 20 },
   noNotes: { fontStyle: 'italic', color: '#888' },
   noteBox: { padding: 15, backgroundColor: '#f0f0f0', marginBottom: 10, borderRadius: 8 },
-  noteText: { fontSize: 16 },
+  noteTitle: { fontSize: 16, fontWeight: 'bold' },
   deleteButton: { marginTop: 5, alignSelf: 'flex-end' },
   deleteText: { color: 'red', fontWeight: 'bold' },
   addButton: {

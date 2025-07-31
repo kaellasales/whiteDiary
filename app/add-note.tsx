@@ -7,33 +7,46 @@ import { useRouter } from 'expo-router';
 
 export default function AddNoteScreen() {
   const router = useRouter();
-  const [note, setNote] = useState('');
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
 
   const saveNote = async () => {
-    if (note.trim() === '') {
-      alert('Digite algo antes de salvar!');
+    if (title.trim() === '' || content.trim() === '') {
+      alert('Preencha título e conteúdo!');
       return;
     }
 
     const stored = await AsyncStorage.getItem('notes');
     const existingNotes = stored ? JSON.parse(stored) : [];
 
-    const updatedNotes = [...existingNotes, note];
-    await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+    const newNote = { title, content };
+    const updatedNotes = [...existingNotes, newNote];
 
-    router.back(); // volta para tela anterior
+    await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+    router.back();
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Nova Anotação</Text>
+
+      <Text style={styles.label}>Título</Text>
       <TextInput
         style={styles.input}
+        placeholder="Digite o título..."
+        value={title}
+        onChangeText={setTitle}
+      />
+
+      <Text style={styles.label}>Conteúdo</Text>
+      <TextInput
+        style={[styles.input, { height: 150 }]}
         placeholder="Digite sua anotação..."
         multiline
-        value={note}
-        onChangeText={setNote}
+        value={content}
+        onChangeText={setContent}
       />
+
       <TouchableOpacity style={styles.button} onPress={saveNote}>
         <Text style={styles.buttonText}>Salvar</Text>
       </TouchableOpacity>
@@ -47,8 +60,8 @@ export default function AddNoteScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+  label: { fontWeight: 'bold', marginBottom: 5, marginTop: 15, fontSize: 16 },
   input: {
-    height: 150,
     backgroundColor: '#f9f9f9',
     padding: 15,
     borderRadius: 8,
@@ -56,7 +69,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#2a9d8f',
-    marginTop: 15,
+    marginTop: 20,
     padding: 15,
     alignItems: 'center',
     borderRadius: 8
