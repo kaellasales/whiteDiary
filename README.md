@@ -72,7 +72,7 @@ WhiteDiary/
 
 Assista ao vídeo demonstrativo do funcionamento do WhiteDiary clicando no link abaixo:
 
-[🔗 Ver demonstração no YouTube](https://www.youtube.com/seu-link-aqui)
+[🔗 Ver demonstração no YouTube](https://youtube.com/shorts/GaNlSzXR4zg?si=-J_gbCWEIV-fXyCk)
 
 
 ## 🛠️ Melhorias futuras
@@ -84,6 +84,6 @@ Assista ao vídeo demonstrativo do funcionamento do WhiteDiary clicando no link 
 ## 🧑‍💻 Autores
 
 Feito pelas Lendas 
-* [Seu Nome](https://github.com/seu-usuario)
+* [Kaella Sales](https://github.com/kaellasales)
 * [Paulinho o Bacana](https://github.com/PauloVictorCT3604)
 
