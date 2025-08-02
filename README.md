@@ -25,7 +25,7 @@ Um app de **diário pessoal** simples e elegante feito com **React Native + Expo
 1. Clone o repositório:
 
 ```bash
-git clone https://github.com/seu-usuario/WhiteDiary.git
+git clone git@github.com:kaellasales/whiteDiary.git
 cd WhiteDiary
 ```
 
