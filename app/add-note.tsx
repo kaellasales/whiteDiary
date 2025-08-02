@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet
+  View, Text, TextInput, TouchableOpacity, Image
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import styles from '../constants/styles';
 
 export default function AddNoteScreen() {
   const router = useRouter();
@@ -12,7 +13,6 @@ export default function AddNoteScreen() {
   const [existingNotes, setExistingNotes] = useState<any[]>([]);
   const [noteIndex, setNoteIndex] = useState<number | null>(null);
 
-  // Carregar notas existentes uma vez
   useEffect(() => {
     const loadNotes = async () => {
       const stored = await AsyncStorage.getItem('notes');
@@ -23,7 +23,6 @@ export default function AddNoteScreen() {
     loadNotes();
   }, []);
 
-  // Autosave
   useEffect(() => {
     const saveTimeout = setTimeout(async () => {
       if (title.trim() === '' && content.trim() === '') return;
@@ -31,12 +30,10 @@ export default function AddNoteScreen() {
       let updatedNotes = [...existingNotes];
 
       if (noteIndex === null) {
-        // Criar nova nota
         const newNote = { title, content };
         updatedNotes.push(newNote);
         setNoteIndex(updatedNotes.length - 1);
       } else {
-        // Atualizar nota existente
         updatedNotes[noteIndex] = { title, content };
       }
 
@@ -47,11 +44,34 @@ export default function AddNoteScreen() {
     return () => clearTimeout(saveTimeout);
   }, [title, content]);
 
+  const saveNoteManually = async () => {
+    if (title.trim() === '' && content.trim() === '') {
+      router.back();
+      return;
+    }
+
+    let updatedNotes = [...existingNotes];
+
+    if (noteIndex === null) {
+      const newNote = { title, content };
+      updatedNotes.push(newNote);
+      setNoteIndex(updatedNotes.length - 1);
+    } else {
+      updatedNotes[noteIndex] = { title, content };
+    }
+
+    setExistingNotes(updatedNotes);
+    await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+    router.back();
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Botão de voltar */}
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Text style={styles.backButtonText}>&lt; todos notes</Text>
+    <View style={styles.darkContainer}>
+      <TouchableOpacity onPress={saveNoteManually} style={styles.backButton}>
+        <Image
+          source={require('../assets/images/back-icon.png')}
+          style={{ width: 28, height: 28 }}
+        />
       </TouchableOpacity>
 
       <Text style={styles.label}>Título</Text>
@@ -65,7 +85,7 @@ export default function AddNoteScreen() {
 
       <Text style={styles.label}>Conteúdo</Text>
       <TextInput
-        style={[styles.input, { height: 150 }]}
+        style={[styles.input, { flex: 1, textAlignVertical: 'top', fontSize: 14, marginBottom: 12 }]}
         placeholder="Digite sua anotação..."
         placeholderTextColor="#aaa"
         multiline
@@ -75,17 +95,3 @@ export default function AddNoteScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#121212' },
-  backButton: { marginBottom: 10 },
-  backButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  label: { fontWeight: 'bold', marginBottom: 5, marginTop: 15, fontSize: 16, color: '#fff' },
-  input: {
-    backgroundColor: '#222',
-    color: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    textAlignVertical: 'top'
-  }
-});

@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, TouchableOpacity, ScrollView, StyleSheet
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  Image
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { Alert } from 'react-native';
-
-
+import styles from '../constants/styles';
 
 type Note = {
   title: string;
@@ -39,15 +42,28 @@ export default function HomeScreen() {
     await AsyncStorage.setItem('notes', JSON.stringify(updated));
   };
 
+  const truncateTitle = (title: string) => {
+    return title.length > 10 ? title.slice(0, 10) + '...' : title;
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Minhas Anotações</Text>
+      <Image
+        source={require('../assets/images/logo.png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+      
+      {/* Linha agora vem antes do título */}
+      <View style={styles.separator} />
 
-  <ScrollView style={styles.scroll}>
+      <Text style={styles.sectionTitle}>Minhas notas</Text>
+
+      <ScrollView contentContainerStyle={styles.grid}>
         {notes.map((note, index) => (
           <TouchableOpacity
             key={index}
-            style={styles.noteBox}
+            style={styles.noteCard}
             onPress={() =>
               router.push({
                 pathname: '/EditNote',
@@ -69,10 +85,18 @@ export default function HomeScreen() {
               );
             }}
           >
-            <Text style={styles.noteTitle}>{note.title}</Text>
+            <View style={styles.iconPlaceholder}>
+              <Image
+                source={require('../assets/images/note-icon.png')}
+                style={styles.noteImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.noteCardTitle}>{truncateTitle(note.title)}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
+
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => router.push('/add-note')}
@@ -82,21 +106,3 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-  scroll: { marginBottom: 100 },
-  noNotes: { fontStyle: 'italic', color: '#888' },
-  noteBox: { padding: 15, backgroundColor: '#f0f0f0', marginBottom: 10, borderRadius: 8 },
-  noteTitle: { fontSize: 16, fontWeight: 'bold' },
-  deleteButton: { marginTop: 5, alignSelf: 'flex-end' },
-  deleteText: { color: 'red', fontWeight: 'bold' },
-  addButton: {
-    backgroundColor: '#2a9d8f',
-    padding: 15,
-    alignItems: 'center',
-    borderRadius: 8
-  },
-  addButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
-});
