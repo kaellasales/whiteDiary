@@ -61,7 +61,19 @@ WhiteDiary/
 
 ## 📱 Capturas de Tela
 
-> Você pode inserir aqui prints como este:
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/80c69e4a-f5fe-4de3-8980-7e8cb7d1b36f" width="200"/>
+  <img src="https://github.com/user-attachments/assets/4bdab914-c4e0-4e7b-a186-a05b73223144" width="200"/>
+  <img src="https://github.com/user-attachments/assets/4e4da235-efd1-413c-aefe-3f82260bc197" width="200"/>
+  <img src="https://github.com/user-attachments/assets/a6d51a81-3979-40c4-b543-9762ae93d955" width="200"/>
+</p>
+
+## 📽️ Vídeo demonstração do app
+
+Assista ao vídeo demonstrativo do funcionamento do WhiteDiary clicando no link abaixo:
+
+[🔗 Ver demonstração no YouTube](https://www.youtube.com/seu-link-aqui)
+
 
 ## 🛠️ Melhorias futuras
 
