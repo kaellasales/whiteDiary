@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, Image
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -30,11 +34,11 @@ export default function AddNoteScreen() {
       let updatedNotes = [...existingNotes];
 
       if (noteIndex === null) {
-        const newNote = { title, content };
-        updatedNotes.push(newNote);
-        setNoteIndex(updatedNotes.length - 1);
+        const newNote = { title, content, lastModified: Date.now() };
+        updatedNotes.unshift(newNote); // última nota no topo
+        setNoteIndex(0);
       } else {
-        updatedNotes[noteIndex] = { title, content };
+        updatedNotes[noteIndex] = { title, content, lastModified: Date.now() };
       }
 
       setExistingNotes(updatedNotes);
@@ -53,11 +57,11 @@ export default function AddNoteScreen() {
     let updatedNotes = [...existingNotes];
 
     if (noteIndex === null) {
-      const newNote = { title, content };
-      updatedNotes.push(newNote);
-      setNoteIndex(updatedNotes.length - 1);
+      const newNote = { title, content, lastModified: Date.now() };
+      updatedNotes.unshift(newNote); // última nota no topo
+      setNoteIndex(0);
     } else {
-      updatedNotes[noteIndex] = { title, content };
+      updatedNotes[noteIndex] = { title, content, lastModified: Date.now() };
     }
 
     setExistingNotes(updatedNotes);
@@ -85,7 +89,7 @@ export default function AddNoteScreen() {
 
       <Text style={styles.label}>Conteúdo</Text>
       <TextInput
-        style={[styles.input, { flex: 1, textAlignVertical: 'top', fontSize: 14, marginBottom: 12 }]}
+        style={styles.textArea} // altura igual ao EditNote
         placeholder="Digite sua anotação..."
         placeholderTextColor="#aaa"
         multiline

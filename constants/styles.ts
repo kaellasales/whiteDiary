@@ -93,13 +93,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     textAlignVertical: 'top',
   },
+  textArea: { // campo de conteúdo do AddNote do mesmo tamanho que EditNote
+    backgroundColor: '#222',
+    color: '#E6EDF3',
+    padding: 15,
+    borderRadius: 8,
+    textAlignVertical: 'top',
+    flex: 1,
+    fontSize: 14,
+    marginBottom: 12,
+  },
   titleEdit: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#E6EDF3',
     marginBottom: 20,
   },
-  
 });
 
 export default styles;
