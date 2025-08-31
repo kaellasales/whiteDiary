@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
-  Image
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -16,6 +15,9 @@ export default function AddNoteScreen() {
   const [content, setContent] = useState('');
   const [existingNotes, setExistingNotes] = useState<any[]>([]);
   const [noteIndex, setNoteIndex] = useState<number | null>(null);
+  // Não há isFavorite nesta tela, pois é uma nova nota. Favoritar só na edição.
+
+  // ... (TODA A SUA LÓGICA useEffect e saveNoteManually permanece EXATAMENTE IGUAL)
 
   useEffect(() => {
     const loadNotes = async () => {
@@ -34,11 +36,23 @@ export default function AddNoteScreen() {
       let updatedNotes = [...existingNotes];
 
       if (noteIndex === null) {
-        const newNote = { title, content, lastModified: Date.now() };
-        updatedNotes.unshift(newNote); // última nota no topo
+        // Nova nota, adiciona ao topo
+        const newNote = { 
+          title, 
+          content, 
+          lastModified: Date.now(),
+          isFavorite: false, // Nova nota não é favorita por padrão
+        };
+        updatedNotes.unshift(newNote); 
         setNoteIndex(0);
       } else {
-        updatedNotes[noteIndex] = { title, content, lastModified: Date.now() };
+        // Editando uma nota existente (auto-save), atualiza o item
+        updatedNotes[noteIndex] = { 
+          ...updatedNotes[noteIndex], // Mantém o status isFavorite existente
+          title, 
+          content, 
+          lastModified: Date.now(),
+        };
       }
 
       setExistingNotes(updatedNotes);
@@ -46,7 +60,7 @@ export default function AddNoteScreen() {
     }, 700);
 
     return () => clearTimeout(saveTimeout);
-  }, [title, content]);
+  }, [title, content]); // isFavorite não é dependência aqui
 
   const saveNoteManually = async () => {
     if (title.trim() === '' && content.trim() === '') {
@@ -57,11 +71,21 @@ export default function AddNoteScreen() {
     let updatedNotes = [...existingNotes];
 
     if (noteIndex === null) {
-      const newNote = { title, content, lastModified: Date.now() };
-      updatedNotes.unshift(newNote); // última nota no topo
+      const newNote = { 
+        title, 
+        content, 
+        lastModified: Date.now(),
+        isFavorite: false, // Nova nota não é favorita por padrão
+      };
+      updatedNotes.unshift(newNote);
       setNoteIndex(0);
     } else {
-      updatedNotes[noteIndex] = { title, content, lastModified: Date.now() };
+      updatedNotes[noteIndex] = { 
+        ...updatedNotes[noteIndex], 
+        title, 
+        content, 
+        lastModified: Date.now(),
+      };
     }
 
     setExistingNotes(updatedNotes);
@@ -71,27 +95,34 @@ export default function AddNoteScreen() {
 
   return (
     <View style={styles.darkContainer}>
-      <TouchableOpacity onPress={saveNoteManually} style={styles.backButton}>
-        <Image
-          source={require('../assets/images/back-icon.png')}
-          style={{ width: 28, height: 28 }}
+      <View style={styles.editHeader}>
+        <TouchableOpacity onPress={saveNoteManually} style={styles.backButton}>
+          <Image
+            source={require('../assets/images/back-icon.png')}
+            style={{ width: 28, height: 28 }}
+          />
+        </TouchableOpacity>
+        
+        <TextInput
+          style={styles.titleInput}
+          placeholder="Título"
+          placeholderTextColor="#555"
+          value={title}
+          onChangeText={setTitle}
+          autoFocus={true}
+          multiline
         />
-      </TouchableOpacity>
+        {/* Ícone de estrela NÃO presente aqui, pois é para nova nota */}
+      </View>
 
-      <Text style={styles.label}>Título</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Digite o título..."
-        placeholderTextColor="#aaa"
-        value={title}
-        onChangeText={setTitle}
-      />
+      {/* Separador e título */}
+      <View style={styles.separator} />
 
-      <Text style={styles.label}>Conteúdo</Text>
+
       <TextInput
-        style={styles.textArea} // altura igual ao EditNote
-        placeholder="Digite sua anotação..."
-        placeholderTextColor="#aaa"
+        style={styles.textArea}
+        placeholder="Comece a escrever..."
+        placeholderTextColor="#555"
         multiline
         value={content}
         onChangeText={setContent}

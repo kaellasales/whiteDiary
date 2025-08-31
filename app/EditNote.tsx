@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import { View, TextInput, TouchableOpacity, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import styles from '../constants/styles';
@@ -11,6 +11,9 @@ export default function EditNoteScreen() {
   const [content, setContent] = useState('');
   const [notes, setNotes] = useState<any[]>([]);
   const [noteIndex, setNoteIndex] = useState<number | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false); // NOVO estado para o favorito
+
+  // ... (TODA A SUA LÓGICA useEffect e handleBack permanece EXATAMENTE IGUAL)
 
   // Carrega a nota e a lista completa
   useEffect(() => {
@@ -23,43 +26,69 @@ export default function EditNoteScreen() {
         const note = parsed[parseInt(index)];
         setTitle(note.title);
         setContent(note.content);
+        setIsFavorite(note.isFavorite || false); // Carrega o status de favorito
       }
     };
     loadNote();
   }, [index]);
 
-  // Salvamento automático enquanto digita
+  // Modifica a lógica de salvamento para incluir o isFavorite
   useEffect(() => {
     const saveTimeout = setTimeout(async () => {
-      if (noteIndex === null) return; // não faz nada se não tiver nota carregada
+      if (noteIndex === null) return;
       if (title.trim() === '' && content.trim() === '') return;
 
       const updatedNotes = [...notes];
-      updatedNotes.splice(noteIndex, 1); // remove a nota antiga
-      updatedNotes.unshift({ title, content, lastModified: Date.now() }); // coloca no topo
+      // Certifica-se de que a nota no índice original tem o título e conteúdo
+      // antes de removê-la e readicioná-la com o novo status de favorito.
+      // Se a lógica de mover para o topo está presente, o índice é 0,
+      // então a nota que está sendo editada já estaria no topo.
+      
+      // O ideal seria encontrar a nota pelo ID ou uma propriedade única,
+      // mas como estamos usando índice, manter a lógica de splice/unshift.
+      
+      // Remove a nota antiga (no índice antes da atualização)
+      const oldNote = updatedNotes.splice(noteIndex, 1)[0]; 
+
+      // Adiciona a nota atualizada no topo, incluindo o status de favorito
+      updatedNotes.unshift({ 
+        ...oldNote, // Mantém outras propriedades se existirem
+        title, 
+        content, 
+        lastModified: Date.now(),
+        isFavorite, // Salva o status de favorito
+      });
 
       setNotes(updatedNotes);
-      setNoteIndex(0); // novo índice é 0 após mover para topo
+      setNoteIndex(0); // O novo índice é 0 após mover para o topo
       await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
     }, 700);
 
     return () => clearTimeout(saveTimeout);
-  }, [title, content]);
+  }, [title, content, isFavorite]); // Adicionado isFavorite às dependências
 
-  // Salvamento ao voltar
+  // Salvamento manual ao voltar, também incluindo isFavorite
   const handleBack = async () => {
     if (noteIndex === null) {
       router.back();
       return;
     }
     if (title.trim() === '' && content.trim() === '') {
+      // Se vazio, apenas volta, sem salvar. A nota existente (se houver) permanece.
       router.back();
       return;
     }
 
     const updatedNotes = [...notes];
-    updatedNotes.splice(noteIndex, 1);
-    updatedNotes.unshift({ title, content, lastModified: Date.now() });
+    const oldNote = updatedNotes.splice(noteIndex, 1)[0]; // Remove a nota antiga
+
+    updatedNotes.unshift({ 
+      ...oldNote, 
+      title, 
+      content, 
+      lastModified: Date.now(),
+      isFavorite,
+    });
 
     setNotes(updatedNotes);
     setNoteIndex(0);
@@ -67,32 +96,51 @@ export default function EditNoteScreen() {
     router.back();
   };
 
+  // Função para alternar o status de favorito
+  const toggleFavorite = () => {
+    setIsFavorite(prev => !prev);
+  };
+
   return (
     <View style={styles.darkContainer}>
-      <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-        <Image
-          source={require('../assets/images/back-icon.png')}
-          style={{ width: 28, height: 28 }}
+      <View style={styles.editHeader}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <Image
+            source={require('../assets/images/back-icon.png')}
+            style={{ width: 28, height: 28 }}
+          />
+        </TouchableOpacity>
+        
+        <TextInput
+          style={styles.titleInput}
+          placeholder="Título"
+          placeholderTextColor="#555"
+          value={title}
+          onChangeText={setTitle}
+          multiline // Permite múltiplas linhas para o título se for muito longo
         />
-      </TouchableOpacity>
 
-      <Text style={styles.label}>Título</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Digite o título"
-        placeholderTextColor="#aaa"
-        value={title}
-        onChangeText={setTitle}
-      />
+        {/* Ícone de estrela */}
+        <TouchableOpacity onPress={toggleFavorite}>
+          <Image
+            source={isFavorite ? require('../assets/images/star-filled-icon.png') : require('../assets/images/star-icon.png')}
+            style={styles.starIcon}
+          />
+        </TouchableOpacity>
+      </View>
 
-      <Text style={styles.label}>Conteúdo</Text>
+      {/* Separador e título */}
+      <View style={styles.separator} />
+
+
       <TextInput
-        style={styles.textArea} // mesma altura do AddNote
-        placeholder="Digite o conteúdo"
-        placeholderTextColor="#aaa"
+        style={styles.textArea}
+        placeholder="Comece a escrever..."
+        placeholderTextColor="#555"
         value={content}
         onChangeText={setContent}
         multiline
+        autoFocus={false}
       />
     </View>
   );

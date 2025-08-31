@@ -6,109 +6,146 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#0D1117',
   },
+
+  // Botão menu hambúrguer
+  menuButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 10,
+  },
+  menuLine: {
+    width: 28,
+    height: 3,
+    backgroundColor: '#9b5de5', // roxo
+    marginVertical: 3,
+    borderRadius: 2,
+  },
+
   logo: {
     width: '100%',
-    height: 80,
-    marginBottom: 10,
+    height: 150,
+    marginTop: 40,
+    marginBottom: 20,
+    alignSelf: 'center',
   },
   sectionTitle: {
     textAlign: 'center',
-    fontSize: 22,
+    fontSize: 35,
     fontWeight: 'bold',
     color: '#E6EDF3',
+    marginBottom: 5,
+    fontFamily: 'monospace',
   },
   separator: {
-    height: 1,
+    height: 3,
     backgroundColor: '#444',
-    marginVertical: 10,
+    marginVertical: 0,
     alignSelf: 'center',
-    width: '100%',
+    width: '110%',
   },
+
+  // Cards em 3 colunas
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    gap: 10,
     paddingBottom: 100,
   },
   noteCard: {
-    width: '48%',
-    backgroundColor: '#1e1e1e',
+    width: '30%',
     borderRadius: 12,
     paddingVertical: 20,
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 10,
   },
   iconPlaceholder: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 90,
     borderRadius: 12,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: '#161B22',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
     overflow: 'hidden',
   },
   noteImage: {
-    width: 40,
-    height: 40,
+    width: 60,
+    height: 70,
+    tintColor: '#E6EDF3',
   },
   noteCardTitle: {
     color: '#E6EDF3',
     fontWeight: '600',
     fontSize: 14,
     textAlign: 'center',
+    marginTop: 4,
+    fontFamily: 'monospace',
   },
+
+  // Botão adicionar
   addButton: {
-    backgroundColor: '#2a9d8f',
-    padding: 15,
-    alignItems: 'center',
-    borderRadius: 8,
+    width: 60,
+    height: 60,
+    borderRadius: 12,
     position: 'absolute',
     bottom: 20,
     right: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  addButtonText: {
-    color: '#E6EDF3',
-    fontWeight: 'bold',
-    fontSize: 24,
-  },
+
+// Telas de Edição e Adição
   darkContainer: {
     flex: 1,
-    padding: 20,
+    paddingTop: 10,
+    paddingHorizontal: 20,
     backgroundColor: '#0D1117',
   },
-  backButton: { marginBottom: 10 },
-  backButtonText: { color: '#E6EDF3', fontWeight: 'bold', fontSize: 16 },
-  label: {
+  
+  editHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    marginTop: 10,
+  },
+  
+  backButton: { 
+    padding: 5,
+  },
+
+  // Ajuste o titleInput
+  titleInput: {
+    height: 40,
+    flex: 1, // Permite que ele cresça, mas respeita outros elementos na linha
+    fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 5,
-    marginTop: 15,
-    fontSize: 16,
     color: '#E6EDF3',
+    marginLeft: 20,
+    // Removendo largura fixa para permitir que ele se ajuste
+    // Certifique-se de que não haja margens/paddings excessivos
   },
-  input: {
-    backgroundColor: '#222',
+
+  textArea: {
+    backgroundColor: 'transparent',
     color: '#E6EDF3',
-    padding: 15,
-    borderRadius: 8,
-    textAlignVertical: 'top',
-  },
-  textArea: { // campo de conteúdo do AddNote do mesmo tamanho que EditNote
-    backgroundColor: '#222',
-    color: '#E6EDF3',
-    padding: 15,
-    borderRadius: 8,
+    padding: 10,
     textAlignVertical: 'top',
     flex: 1,
-    fontSize: 14,
-    marginBottom: 12,
+    fontSize: 16,
+    lineHeight: 24,
   },
-  titleEdit: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#E6EDF3',
-    marginBottom: 20,
+
+  // NOVO ESTILO para o ícone de estrela
+  starIcon: {
+    width: 30, // Tamanho do ícone
+    height: 30, // Tamanho do ícone
+    tintColor: '#9b5de5', // Cor da estrela (exemplo roxo)
+    marginLeft: 20, // Empurra a estrela para a direita
   },
+
+  // ... (mantenha o resto dos seus estilos)
 });
 
 export default styles;

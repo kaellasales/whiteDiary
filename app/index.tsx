@@ -32,20 +32,31 @@ export default function HomeScreen() {
   };
 
   const truncateTitle = (title: string) => {
-    return title.length > 10 ? title.slice(0, 10) + '...' : title;
+    return title.length > 12 ? title.slice(0, 12) + '...' : title;
   };
 
   return (
     <View style={styles.container}>
+      {/* Botão Menu (placeholder para futuro uso) */}
+      <TouchableOpacity style={styles.menuButton}>
+        <View style={styles.menuLine} />
+        <View style={styles.menuLine} />
+        <View style={styles.menuLine} />
+      </TouchableOpacity>
+
+      {/* Logo */}
       <Image
         source={require('../assets/images/logo.png')}
         style={styles.logo}
         resizeMode="contain"
       />
-
-      <View style={styles.separator} />
+      
       <Text style={styles.sectionTitle}>Minhas notas</Text>
+      
+      {/* Separador e título */}
+      <View style={styles.separator} />
 
+      {/* Lista de notas */}
       <ScrollView contentContainerStyle={styles.grid}>
         {notes.length === 0 ? (
           <Text style={{ color: '#aaa', textAlign: 'center', marginTop: 20 }}>
@@ -87,11 +98,12 @@ export default function HomeScreen() {
         )}
       </ScrollView>
 
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => router.push('/add-note')}
-      >
-        <Text style={styles.addButtonText}>+</Text>
+      {/* Botão adicionar */}
+      <TouchableOpacity style={styles.addButton}onPress={() => router.push('/add-note')}>
+        <Image 
+          source={require('../assets/images/addbutton.png')}
+          style={{ width: 50, height: 50 }}
+        />
       </TouchableOpacity>
     </View>
   );
