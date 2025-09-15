@@ -37,14 +37,6 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Botão Menu (placeholder para futuro uso) */}
-      <TouchableOpacity style={styles.menuButton}>
-        <View style={styles.menuLine} />
-        <View style={styles.menuLine} />
-        <View style={styles.menuLine} />
-      </TouchableOpacity>
-
-      {/* Logo */}
       <Image
         source={require('../assets/images/logo.png')}
         style={styles.logo}
