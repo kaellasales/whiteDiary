@@ -1,0 +1,391 @@
+--INDEX
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useIsFocused } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
+import styles from '../constants/styles';
+
+export default function HomeScreen() {
+  const router = useRouter();
+  const isFocused = useIsFocused();
+  const [notes, setNotes] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isFocused) loadNotes();
+  }, [isFocused]);
+
+  const loadNotes = async () => {
+    const stored = await AsyncStorage.getItem('notes');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Ordena pela última modificação
+      parsed.sort((a: any, b: any) => (b.lastModified || 0) - (a.lastModified || 0));
+      setNotes(parsed);
+    }
+  };
+
+  const deleteNote = async (index: number) => {
+    const updated = [...notes];
+    updated.splice(index, 1);
+    setNotes(updated);
+    await AsyncStorage.setItem('notes', JSON.stringify(updated));
+  };
+
+  const truncateTitle = (title: string) => {
+    return title.length > 12 ? title.slice(0, 12) + '...' : title;
+  };
+
+  return (
+    <View style={styles.container}>
+      <Image
+        source={require('../assets/images/logo.png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+      
+      <Text style={styles.sectionTitle}>Minhas notas</Text>
+      
+      {/* Separador e título */}
+      <View style={styles.separator} />
+
+      {/* Lista de notas */}
+      <ScrollView contentContainerStyle={styles.grid}>
+        {notes.length === 0 ? (
+          <Text style={{ color: '#aaa', textAlign: 'center', marginTop: 20 }}>
+            Nenhuma nota ainda. Toque no + para criar sua primeira!
+          </Text>
+        ) : (
+          notes.map((note, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.noteCard}
+              onPress={() =>
+                router.push({ pathname: '/EditNote', params: { index: String(index) } })
+              }
+              onLongPress={() => {
+                Alert.alert(
+                  'Excluir anotação',
+                  'Tem certeza que deseja excluir esta anotação?',
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                      text: 'Excluir',
+                      onPress: () => deleteNote(index),
+                      style: 'destructive',
+                    },
+                  ]
+                );
+              }}
+            >
+              <View style={styles.iconPlaceholder}>
+                <Image
+                  source={require('../assets/images/note-icon.png')}
+                  style={styles.noteImage}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={styles.noteCardTitle}>{truncateTitle(note.title)}</Text>
+            </TouchableOpacity>
+          ))
+        )}
+      </ScrollView>
+
+      {/* Botão adicionar */}
+      <TouchableOpacity style={styles.addButton}onPress={() => router.push('/add-note')}>
+        <Image 
+          source={require('../assets/images/addbutton.png')}
+          style={{ width: 50, height: 50 }}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+
+-- ADD NOTE
+// app/add-note.tsx
+
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  SafeAreaView, // Importação Adicionada
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import styles from '../constants/styles';
+
+export default function AddNoteScreen() {
+  const router = useRouter();
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  // ...lógica existente...
+  const [existingNotes, setExistingNotes] = useState<any[]>([]);
+  const [noteIndex, setNoteIndex] = useState<number | null>(null);
+
+  useEffect(() => { const loadNotes = async () => { const stored = await AsyncStorage.getItem('notes'); if (stored) { setExistingNotes(JSON.parse(stored)); } }; loadNotes(); }, []);
+  useEffect(() => { const saveTimeout = setTimeout(async () => { if (title.trim() === '' && content.trim() === '') return; let updatedNotes = [...existingNotes]; if (noteIndex === null) { const newNote = { title, content, lastModified: Date.now(), isFavorite: false }; updatedNotes.unshift(newNote); setNoteIndex(0); } else { updatedNotes[noteIndex] = { ...updatedNotes[noteIndex], title, content, lastModified: Date.now() }; } setExistingNotes(updatedNotes); await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes)); }, 700); return () => clearTimeout(saveTimeout); }, [title, content]);
+  const saveNoteManually = async () => { if (title.trim() === '' && content.trim() === '') { router.back(); return; } let updatedNotes = [...existingNotes]; if (noteIndex === null) { const newNote = { title, content, lastModified: Date.now(), isFavorite: false }; updatedNotes.unshift(newNote); setNoteIndex(0); } else { updatedNotes[noteIndex] = { ...updatedNotes[noteIndex], title, content, lastModified: Date.now() }; } setExistingNotes(updatedNotes); await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes)); router.back(); };
+
+  return (
+    // SafeAreaView garante que o conteúdo não fique sob a barra de status/notch
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0D1117' }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        {/* ESTA VIEW APLICA O PADDING E RESTAURA O LAYOUT */}
+        <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
+          
+          <View style={styles.editHeader}>
+            <TouchableOpacity onPress={saveNoteManually} style={styles.backButton}>
+              <Image source={require('../assets/images/back-icon.png')} style={{ width: 28, height: 28 }} />
+            </TouchableOpacity>
+            <TextInput style={styles.titleInput} placeholder="Título" placeholderTextColor="#555" value={title} onChangeText={setTitle} autoFocus={true} multiline />
+          </View>
+
+          <View style={styles.separator} />
+
+          <ScrollView 
+            style={{ flex: 1 }} 
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <TextInput
+              style={styles.textArea}
+              placeholder="Comece a escrever..."
+              placeholderTextColor="#555"
+              multiline
+              value={content}
+              onChangeText={setContent}
+            />
+          </ScrollView>
+
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+
+-- EDIT NOTE
+
+// app/EditNote.tsx
+
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import styles from '../constants/styles';
+
+export default function EditNoteScreen() {
+  const router = useRouter();
+  // ...lógica existente...
+  const { index } = useLocalSearchParams<{ index: string }>();
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [notes, setNotes] = useState<any[]>([]);
+  const [noteIndex, setNoteIndex] = useState<number | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => { const loadNote = async () => { const stored = await AsyncStorage.getItem('notes'); if (stored && index !== undefined) { const parsed = JSON.parse(stored); setNotes(parsed); const noteIdx = parseInt(index); setNoteIndex(noteIdx); if (parsed[noteIdx]) { const note = parsed[noteIdx]; setTitle(note.title); setContent(note.content); setIsFavorite(note.isFavorite || false); } } }; loadNote(); }, [index]);
+  useEffect(() => { const saveTimeout = setTimeout(async () => { if (noteIndex === null) return; if (title.trim() === '' && content.trim() === '') return; const updatedNotes = [...notes]; const currentNote = { ...updatedNotes[noteIndex], title, content, lastModified: Date.now(), isFavorite, }; updatedNotes.splice(noteIndex, 1); updatedNotes.unshift(currentNote); setNotes(updatedNotes); setNoteIndex(0); await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes)); }, 700); return () => clearTimeout(saveTimeout); }, [title, content, isFavorite]);
+  const handleBack = async () => { if (noteIndex === null) { router.back(); return; } if (title.trim() === '' && content.trim() === '') { router.back(); return; } const updatedNotes = [...notes]; const currentNote = { ...updatedNotes[noteIndex], title, content, lastModified: Date.now(), isFavorite, }; updatedNotes.splice(noteIndex, 1); updatedNotes.unshift(currentNote); await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes)); router.back(); };
+  const toggleFavorite = () => { setIsFavorite(prev => !prev); };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0D1117' }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        {/* ESTA VIEW APLICA O PADDING E RESTAURA O LAYOUT */}
+        <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
+
+          <View style={styles.editHeader}>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <Image source={require('../assets/images/back-icon.png')} style={{ width: 28, height: 28 }} />
+            </TouchableOpacity>
+            <TextInput style={styles.titleInput} placeholder="Título" placeholderTextColor="#555" value={title} onChangeText={setTitle} multiline />
+            <TouchableOpacity onPress={toggleFavorite}>
+              <Image source={isFavorite ? require('../assets/images/star-filled-icon.png') : require('../assets/images/star-icon.png')} style={styles.starIcon} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.separator} />
+
+          <ScrollView 
+            style={{ flex: 1 }} 
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <TextInput
+              style={styles.textArea}
+              placeholder="Comece a escrever..."
+              placeholderTextColor="#555"
+              value={content}
+              onChangeText={setContent}
+              multiline
+              autoFocus={false}
+            />
+          </ScrollView>
+
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+
+-- CADASTRO 
+// app/cadastro.tsx
+
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import styles from '../constants/styles';
+
+export default function CadastroScreen() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0D1117' }}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.authContainer}
+      >
+        <Image
+          source={require('../assets/images/logo.png')} // Verifique se o caminho do logo está correto
+          style={styles.authLogo}
+          resizeMode="contain"
+        />
+
+        <TextInput
+          style={styles.authInput}
+          placeholder="Email"
+          placeholderTextColor="#888"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <TextInput
+          style={styles.authInput}
+          placeholder="Senha"
+          placeholderTextColor="#888"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+
+        <TouchableOpacity 
+          style={styles.authButtonFull} 
+          onPress={() => router.push('../app/login')} // Navega de volta para o login
+        >
+          <Text style={styles.authButtonText}>Registrar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('../app/login')}>
+          <Text style={styles.authLink}>Já tenho cadastro</Text>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+
+-- LOGIN
+
+// app/login.tsx
+
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import styles from '../constants/styles';
+
+export default function LoginScreen() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0D1117' }}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.authContainer}
+      >
+        <Image
+          source={require('../assets/images/logo.png')} // Verifique se o caminho do logo está correto
+          style={styles.authLogo}
+          resizeMode="contain"
+        />
+
+        <TextInput
+          style={styles.authInput}
+          placeholder="Email"
+          placeholderTextColor="#888"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <TextInput
+          style={styles.authInput}
+          placeholder="Senha"
+          placeholderTextColor="#888"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry // Esconde a senha
+        />
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={styles.authButton} 
+            onPress={() => router.push('/')} // Navega para a tela principal (index)
+          >
+            <Text style={styles.authButtonText}>Entrar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.authButton} 
+            onPress={() => router.push('../app/cadastro')} // Navega para a tela de cadastro
+          >
+            <Text style={styles.authButtonText}>Registra-se</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity onPress={() => { /* Lógica de esqueci a senha virá aqui */ }}>
+          <Text style={styles.authLink}>Esqueci a senha?</Text>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
