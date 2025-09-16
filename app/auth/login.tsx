@@ -1,15 +1,13 @@
-// app/login.tsx
-
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
+ View,
+ Text,
+ TextInput,
+ TouchableOpacity,
+ Image,
+ SafeAreaView,
+ KeyboardAvoidingView,
+ Platform,
 Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -21,14 +19,25 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async () => {
+    const handleLogin = async () => {
     if (email === '' || password === '') {
       Alert.alert('Erro', 'Por favor, preencha todos os campos.');
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Erro', 'Por favor, insira um formato de e-mail válido.');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter no mínimo 6 caracteres.');
+      return;
+    }
+
     try {
       await auth.signInWithEmailAndPassword(email, password);
-      router.push('/');
+      router.push('/(tabs)');
     } catch (error: any) {
       Alert.alert('Erro no Login', 'E-mail ou senha inválidos.');
     }
@@ -41,7 +50,7 @@ export default function LoginScreen() {
         style={styles.authContainer}
       >
         <Image
-          source={require('../assets/images/logo.png')}
+          source={require('../../assets/images/logo.png')}
           style={styles.authLogo}
           resizeMode="contain"
         />
@@ -71,7 +80,7 @@ export default function LoginScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.authButton}
-            onPress={() => router.push('/cadastro')}
+            onPress={() => router.push('/auth/cadastro')}
           >
             <Text style={styles.authButtonText}>Registra-se</Text>
           </TouchableOpacity>

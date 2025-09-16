@@ -29,15 +29,15 @@ export default function RootLayout() {
       return;
     }
 
-    const inAppGroup = segments[0] === 'app';
+    const inAppGroup = segments[0] === '(tabs)';
 
    
     if (user && !inAppGroup) {
-      router.replace({ pathname: 'index' });
+      router.replace({ pathname: '/(tabs)' });
     } 
     
     else if (!user && inAppGroup) {
-      router.replace({ pathname: 'login' });
+      router.replace({ pathname: '/auth/login' });
     }
   }, [user, loading, segments]);
 

@@ -52,7 +52,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', paddingHorizontal: 15 }}>
              <Image
-                source={require('../assets/images/logo.png')}
+                source={require('../../assets/images/logo.png')}
                 style={styles.logo}
                 resizeMode="contain"
             />
@@ -75,7 +75,7 @@ export default function HomeScreen() {
               key={note.id} // Usando o ID do Firestore como chave
               style={styles.noteCard}
               onPress={() =>
-                router.push({ pathname: '/app/EditNote', params: { noteId: note.id } }) // Passando o ID
+                router.push({ pathname: '/(tabs)/EditNote', params: { noteId: note.id } }) // Passando o ID
               }
               onLongPress={() => {
                 Alert.alert(
@@ -87,10 +87,10 @@ export default function HomeScreen() {
                 );
               }}
             >
-              {note.isFavorite && <Image source={require('../assets/images/star-filled-icon.png')} style={{position: 'absolute', top: 8, right: 8, width: 16, height: 16}}/>}
+              {note.isFavorite && <Image source={require('../../assets/images/star-filled-icon.png')} style={{position: 'absolute', top: 8, right: 8, width: 16, height: 16}}/>}
               <View style={styles.iconPlaceholder}>
                 <Image
-                  source={require('../assets/images/note-icon.png')}
+                  source={require('../../assets/images/note-icon.png')}
                   style={styles.noteImage}
                   resizeMode="contain"
                 />
@@ -101,9 +101,9 @@ export default function HomeScreen() {
         )}
       </ScrollView>
 
-      <TouchableOpacity style={styles.addButton} onPress={() => router.push('/app/add-note')}>
+      <TouchableOpacity style={styles.addButton} onPress={() => router.push('/(tabs)/add-note')}>
         <Image 
-          source={require('../assets/images/addbutton.png')}
+          source={require('../../assets/images/addbutton.png')}
           style={{ width: 50, height: 50 }}
         />
       </TouchableOpacity>

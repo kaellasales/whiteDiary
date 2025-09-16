@@ -71,7 +71,7 @@ export default function AddNoteScreen() {
           
           <View style={styles.editHeader}>
             <TouchableOpacity onPress={saveNoteManually} style={styles.backButton}>
-              <Image source={require('../assets/images/back-icon.png')} style={{ width: 28, height: 28 }} />
+              <Image source={require('../../assets/images/back-icon.png')} style={{ width: 28, height: 28 }} />
             </TouchableOpacity>
             <TextInput 
               style={styles.titleInput} 

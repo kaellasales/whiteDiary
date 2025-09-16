@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import styles from '../constants/styles';
+import styles from '../../constants/styles';
 
 export default function EditNoteScreen() {
   const router = useRouter();
@@ -32,11 +32,11 @@ export default function EditNoteScreen() {
 
           <View style={styles.editHeader}>
             <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-              <Image source={require('../assets/images/back-icon.png')} style={{ width: 28, height: 28 }} />
+              <Image source={require('../../assets/images/back-icon.png')} style={{ width: 28, height: 28 }} />
             </TouchableOpacity>
             <TextInput style={styles.titleInput} placeholder="Título" placeholderTextColor="#555" value={title} onChangeText={setTitle} multiline />
             <TouchableOpacity onPress={toggleFavorite}>
-              <Image source={isFavorite ? require('../assets/images/star-filled-icon.png') : require('../assets/images/star-icon.png')} style={styles.starIcon} />
+              <Image source={isFavorite ? require('../../assets/images/star-filled-icon.png') : require('../../assets/images/star-icon.png')} style={styles.starIcon} />
             </TouchableOpacity>
           </View>
 

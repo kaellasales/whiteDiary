@@ -1,5 +1,3 @@
-// app/cadastro.tsx
-
 import React, { useState } from 'react';
 import {
   View,
@@ -10,17 +8,15 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  // Alert, // Não vamos mais usar o Alert
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from '../../constants/styles';
-import { auth } from "../../firebaseConfig";
+import { auth } from  '../../firebaseConfig';
 
 export default function CadastroScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  // 1. Crie um estado para a mensagem de erro
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleSignUp = async () => {
@@ -31,11 +27,9 @@ export default function CadastroScreen() {
     }
     try {
       await auth.createUserWithEmailAndPassword(email, password);
-      // O Alert de sucesso ainda é aceitável, mas poderia ser uma tela de "verifique seu email".
       alert('Sucesso! Sua conta foi criada. Faça o login para continuar.');
-      router.push('/login');
+      router.push('/auth/login');
     } catch (error: any) {
-      // 2. Em vez de Alert, vamos definir a mensagem de erro no estado
       if (error.code === 'auth/email-already-in-use') {
         setErrorMessage('Este e-mail já está em uso.');
       } else if (error.code === 'auth/invalid-email') {
@@ -55,7 +49,7 @@ export default function CadastroScreen() {
         style={styles.authContainer}
       >
         <Image
-          source={require('../assets/images/logo.png')}
+          source={require('../../assets/images/logo.png')}
           style={styles.authLogo}
           resizeMode="contain"
         />
@@ -93,7 +87,7 @@ export default function CadastroScreen() {
           <Text style={styles.authButtonText}>Registrar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push('/login')}>
+        <TouchableOpacity onPress={() => router.push('/auth/login')}>
           <Text style={styles.authLink}>Já tenho cadastro</Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
