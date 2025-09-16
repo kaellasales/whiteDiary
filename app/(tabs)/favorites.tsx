@@ -1,4 +1,4 @@
-// app/(tabs)/index.tsx
+// app/(tabs)/favorites.tsx
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, SafeAreaView } from 'react-native';
@@ -8,9 +8,9 @@ import styles from '../../constants/styles';
 import CustomTopTabs from '../../components/CustomTopTabs';
 
 import { auth, db } from '../../firebaseConfig';
-import { collection, onSnapshot, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, deleteDoc, where } from 'firebase/firestore';
 
-export default function HomeScreen() {
+export default function FavoritesScreen() {
   const router = useRouter();
   const isFocused = useIsFocused();
   const [notes, setNotes] = useState<any[]>([]);
@@ -32,7 +32,7 @@ export default function HomeScreen() {
     if (!user) return () => {};
 
     const notesCollection = collection(db, 'users', user.uid, 'notes');
-    const q = query(notesCollection, orderBy('lastModified', 'desc'));
+    const q = query(notesCollection, where('isFavorite', '==', true), orderBy('lastModified', 'desc'));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const notesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -60,6 +60,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0D1117' }}>
       <View style={styles.container}>
+        
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Image
             source={require('../../assets/images/logout-icon.png')}
@@ -73,14 +74,14 @@ export default function HomeScreen() {
           resizeMode="contain"
         />
         
-        <CustomTopTabs activeTab="index" /> 
+        <CustomTopTabs activeTab="favorites" />
         
         <View style={styles.separator} />
 
         <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.grid}>
           {notes.length === 0 ? (
             <Text style={{ color: '#aaa', textAlign: 'center', marginTop: 20 }}>
-              Nenhuma nota ainda. Toque no + para criar sua primeira!
+              Nenhuma nota favorita ainda.
             </Text>
           ) : (
             notes.map((note) => (

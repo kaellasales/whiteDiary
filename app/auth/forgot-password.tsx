@@ -1,4 +1,4 @@
-// app/auth/login.tsx
+// app/auth/forgot-password.tsx
 
 import React, { useState } from 'react';
 import {
@@ -15,27 +15,37 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from '../../constants/styles';
-import { auth } from '../../firebaseConfig';
 
-export default function LoginScreen() {
+// Importações necessárias do Firebase
+import { auth } from '../../firebaseConfig';
+import { sendPasswordResetEmail } from 'firebase/auth';
+
+export default function ForgotPasswordScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (email.trim() === '' || password.trim() === '') {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+  const handlePasswordReset = async () => {
+    if (email.trim() === '') {
+      Alert.alert("Campo obrigatório", "Por favor, digite seu e-mail.");
       return;
     }
-    
+
     setIsLoading(true);
     try {
-      await auth.signInWithEmailAndPassword(email, password);
-      // Usa 'replace' para que o usuário não possa "voltar" para a tela de login
-      router.replace('/(tabs)'); 
+      // Função do Firebase para enviar o e-mail de redefinição
+      await sendPasswordResetEmail(auth, email);
+      
+      Alert.alert(
+        "Verifique seu E-mail",
+        `Se uma conta com o e-mail ${email} existir, um link para redefinir sua senha foi enviado.`
+      );
+      router.back(); // Volta para a tela de login
+
     } catch (error: any) {
-      Alert.alert('Erro no Login', 'E-mail ou senha inválidos.');
+      // O Firebase já trata o erro de e-mail inválido, mas podemos ter um alerta genérico
+      console.error("Erro ao redefinir senha:", error);
+      Alert.alert("Erro", "Não foi possível enviar o e-mail. Verifique o endereço digitado.");
     } finally {
       setIsLoading(false);
     }
@@ -52,6 +62,11 @@ export default function LoginScreen() {
           style={styles.authLogo}
           resizeMode="contain"
         />
+
+        <Text style={styles.authInstructionText}>
+          Digite seu e-mail abaixo e enviaremos um link para você criar uma nova senha.
+        </Text>
+
         <TextInput
           style={styles.authInput}
           placeholder="Email"
@@ -60,40 +75,23 @@ export default function LoginScreen() {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.authInput}
-          placeholder="Senha"
-          placeholderTextColor="#888"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
+          autoFocus={true}
         />
         
         <TouchableOpacity
           style={styles.authButtonFull}
-          onPress={handleLogin}
+          onPress={handlePasswordReset}
           disabled={isLoading}
         >
           {isLoading 
             ? <ActivityIndicator color="#FFF" /> 
-            : <Text style={styles.authButtonText}>Entrar</Text>
+            : <Text style={styles.authButtonText}>Enviar Link de Recuperação</Text>
           }
         </TouchableOpacity>
 
-        {/* ===== LINK AGORA FUNCIONAL ===== */}
-        <TouchableOpacity onPress={() => router.push('/auth/forgot-password')}>
-          <Text style={styles.authLink}>Esqueci a senha?</Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={styles.backToLoginLink}>Voltar para o Login</Text>
         </TouchableOpacity>
-        {/* =============================== */}
-
-        <View style={styles.signupRedirectContainer}>
-          <Text style={styles.signupRedirectText}>Não possui uma conta?</Text>
-          <TouchableOpacity onPress={() => router.push('/auth/cadastro')}>
-            <Text style={styles.signupRedirectLink}>CADASTRA-SE</Text>
-          </TouchableOpacity>
-        </View>
-
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
