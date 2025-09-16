@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+// app/(tabs)/add-note.tsx
+
+// 1. Importe 'useCallback' do React e 'useFocusEffect' do Expo Router
+import React, { useState, useCallback } from 'react';
+import { useRouter, useFocusEffect } from 'expo-router';
 import {
   View,
   TextInput,
@@ -9,12 +13,9 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
-// AsyncStorage foi removido
-import { useRouter } from 'expo-router';
 import styles from '../../constants/styles';
-
-// 1. Importações necessárias do Firebase
 import { auth, db } from '../../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -22,45 +23,47 @@ export default function AddNoteScreen() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  // 2. Removemos os useEffects e estados que gerenciavam a lista inteira de notas (existingNotes, noteIndex).
-  //    A tela de "adicionar" agora tem uma única responsabilidade: criar uma nova nota.
+  // 2. Adicione este hook para limpar os campos toda vez que a tela for focada
+  useFocusEffect(
+    useCallback(() => {
+      // Esta função é executada toda vez que a tela entra em foco
+      setTitle('');
+      setContent('');
+      setIsSaving(false); // Garante que o estado de 'salvando' também seja resetado
+    }, [])
+  );
 
-  // 3. A função de salvar foi simplificada para usar o Firestore
   const saveNoteManually = async () => {
-    // A verificação se está vazio continua igual
     if (title.trim() === '' && content.trim() === '') {
       router.back();
       return;
     }
 
-    // Garante que o usuário está logado para poder salvar
-    if (!auth.currentUser) {
-        Alert.alert('Erro', 'Você precisa estar logado para salvar uma nota.');
-        return;
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert('Erro', 'Você precisa estar logado para salvar uma nota.');
+      return;
     }
 
+    setIsSaving(true);
     try {
-      // Cria uma referência para a subcoleção 'notes' do usuário atual
-      const notesCollectionRef = collection(db, 'users', auth.currentUser.uid, 'notes');
-      
-      // Adiciona um novo documento na coleção com os dados da nota
+      const notesCollectionRef = collection(db, 'users', user.uid, 'notes');
       await addDoc(notesCollectionRef, {
-        title: title || "Sem Título", // Garante um título padrão
-        content: content,
-        isFavorite: false, // Notas novas nunca são favoritas
-        lastModified: serverTimestamp(), // O Firebase cuida de colocar a data/hora atual
+        title: title.trim() || "Sem Título",
+        content: content.trim(),
+        isFavorite: false,
+        lastModified: serverTimestamp(),
       });
-
       router.back();
-
     } catch (error) {
       console.error("Erro ao salvar a nota: ", error);
       Alert.alert('Erro', 'Não foi possível salvar a nota.');
+      setIsSaving(false);
     }
   };
 
-  // O seu código JSX (a parte visual) não precisa de nenhuma alteração.
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0D1117' }}>
       <KeyboardAvoidingView
@@ -68,9 +71,8 @@ export default function AddNoteScreen() {
         style={{ flex: 1 }}
       >
         <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20 }}>
-          
           <View style={styles.editHeader}>
-            <TouchableOpacity onPress={saveNoteManually} style={styles.backButton}>
+            <TouchableOpacity onPress={saveNoteManually} style={styles.backButton} disabled={isSaving}>
               <Image source={require('../../assets/images/back-icon.png')} style={{ width: 28, height: 28 }} />
             </TouchableOpacity>
             <TextInput 
@@ -100,7 +102,6 @@ export default function AddNoteScreen() {
               onChangeText={setContent}
             />
           </ScrollView>
-
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
